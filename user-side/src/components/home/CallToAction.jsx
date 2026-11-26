@@ -8,7 +8,7 @@ export default function CallToAction() {
     <section className="relative bg-gradient-to-r from-red-600 via-pink-600 to-purple-700 py-20 px-6 text-center overflow-hidden brightness-95">
       {/* Background effects */}
       <motion.div
-        className="absolute inset-0 bg-[url('/cta-bg.jpg')] bg-cover bg-center opacity-20"
+        className="absolute inset-0 bg-gradient-to-br from-black/20 to-purple-900/20 bg-cover bg-center opacity-20"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.2 }}
         transition={{ duration: 1.2 }}
@@ -31,7 +31,7 @@ export default function CallToAction() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        Unlimited Movies, Series & Anime
+        Discover Movies, Series & Anime
       </motion.h2>
       <motion.p
         className="relative text-lg text-gray-200 max-w-2xl mx-auto mb-8"
@@ -39,8 +39,7 @@ export default function CallToAction() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.2 }}
       >
-        Join today and dive into a world of entertainment. Watch anytime,
-        anywhere. Cancel anytime.
+        Explore free content and unlock individual paid movies, series or episodes.
       </motion.p>
 
       {/* CTA Buttons */}
@@ -57,10 +56,10 @@ export default function CallToAction() {
           Get Started
         </button>
         <button
-          onClick={() => navigate("/pricing")}
+          onClick={() => navigate("/movies")}
           className="px-6 py-3 rounded-xl bg-red-500/40 border border-white text-white font-semibold text-lg hover:bg-red-500/60 transition shadow-lg"
         >
-          View Plans
+          Browse Movies
         </button>
       </motion.div>
     </section>

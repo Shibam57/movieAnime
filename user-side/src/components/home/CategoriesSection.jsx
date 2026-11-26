@@ -30,7 +30,8 @@ export default function CategoriesSection() {
         {/* Category Grid */}
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           {categories.map((cat, i) => (
-            <motion.div
+            <motion.button
+              type="button"
               key={cat.name}
               onClick={() => navigate(`/genre/${cat.name.toLowerCase()}`)}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -40,7 +41,7 @@ export default function CategoriesSection() {
             >
               <div className="bg-white/20 p-3 rounded-full">{cat.icon}</div>
               <h3 className="font-semibold text-lg">{cat.name}</h3>
-            </motion.div>
+            </motion.button>
           ))}
         </div>
       </div>

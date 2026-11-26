@@ -6,12 +6,12 @@ const features = [
   {
     icon: <Film className="w-10 h-10 text-red-500" />,
     title: "Blockbuster Movies",
-    description: "Enjoy unlimited access to the latest hits and timeless classics.",
+    description: "Discover free and paid movies in the catalog.",
   },
   {
     icon: <Tv className="w-10 h-10 text-indigo-500" />,
     title: "Addictive Series",
-    description: "Binge-worthy series across genres, updated weekly.",
+    description: "Discover series across different genres.",
   },
   {
     icon: <MonitorPlay className="w-10 h-10 text-green-500" />,
@@ -32,6 +32,7 @@ export default function FeaturesSection() {
       <video
         className="absolute inset-0 w-full h-full object-cover blur-md scale-105"
         src={video}
+        preload="none"
         autoPlay
         loop
         muted

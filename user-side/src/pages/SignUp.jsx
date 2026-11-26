@@ -1,114 +1,52 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
-export default function SignupPage() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    fullname: "",
-    password: "",
-    avatar: null, 
-  });
-  const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleFileChange = (e) => {
-    setForm({ ...form, avatar: e.target.files[0] });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    try {
-        const formData = new FormData();
-        for (const key in form) {
-            formData.append(key, form[key]);
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import api from '../services/api';
+import { errorMessage } from '../utils/contracts';
+const imageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+export default function SignUp() {
+    const [form, setForm] = useState({ username: '', fullname: '', email: '', password: '' });
+    const [avatar, setAvatar] = useState(null);
+    const [error, setError] = useState('');
+    const [busy, setBusy] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+    const submit = async (e) => {
+        e.preventDefault();
+        if (busy)
+            return;
+        setError('');
+        if (!form.username.trim() || !form.fullname.trim() || !form.email.trim())
+            return setError('Enter all required fields.');
+        if (form.password.length < 6 || new TextEncoder().encode(form.password).length > 72)
+            return setError('Password must be at least 6 characters and at most 72 bytes.');
+        if (!avatar || !imageTypes.includes(avatar.type) || avatar.size > 10 * 1024 * 1024)
+            return setError('Choose a JPEG, PNG, WebP, GIF or AVIF avatar up to 10 MB.');
+        const body = new FormData();
+        Object.entries(form).forEach(([key, value]) => body.append(key, key === 'password' ? value : value.trim()));
+        body.append('avatar', avatar);
+        setBusy(true);
+        try {
+            await api.post('/api/v1/users/register', body, { skipAuth: true, timeout: 60000 });
+            navigate('/login', { replace: true, state: { registered: true, from: location.state?.from } });
         }
-
-        await axios.post("/api/v1/users/register", formData, { 
-            withCredentials: true 
-        });
-
-        alert("Signup successful! Please log in.");
-        navigate("/login");
-
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || "Signup failed");
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-800 text-white p-8 rounded-xl shadow-md w-full max-w-md"
-      >
-        <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
-
-        {error && <p className="text-red-400 mb-4">{error}</p>}
-
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          required
-          className="w-full mb-4 p-3 rounded bg-gray-700 text-white"
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-          className="w-full mb-4 p-3 rounded bg-gray-700 text-white"
-        />
-
-        <input
-          type="text"
-          name="fullname"
-          placeholder="Full Name"
-          value={form.fullname}
-          onChange={handleChange}
-          required
-          className="w-full mb-4 p-3 rounded bg-gray-700 text-white"
-        />
-
-        <input
-          type="file"
-          name="avatar"
-          accept="image/*"
-          onChange={handleFileChange}
-          required
-          className="w-full mb-4 p-3 rounded bg-gray-700 text-white"
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-          className="w-full mb-6 p-3 rounded bg-gray-700 text-white"
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-semibold transition"
-        >
-          Sign Up
-        </button>
-      </form>
-    </div>
-  );
+        catch (err) {
+            setError(errorMessage(err));
+        }
+        finally {
+            setBusy(false);
+        }
+    };
+    return <div className="auth-shell"><form onSubmit={submit} className="auth-card">
+    <h1 className="text-3xl font-bold">Create account</h1>
+    {error && <p role="alert" className="text-red-300">{error}</p>}
+    
+        {[['fullname', 'Full name', 'text', 'name'], ['username', 'Username', 'text', 'username'], ['email', 'Email', 'email', 'email'], ['password', 'Password', 'password', 'new-password']].map(([key, label, type, auto]) => <label key={key}>
+        {label}
+        <input className="field" type={type} autoComplete={auto} required minLength={key === 'password' ? 6 : undefined} value={form[key]} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))}/>
+        </label>)}
+    
+    <label>Avatar (up to 10 MB)<input className="field" type="file" required accept={imageTypes.join(',')} onChange={e => setAvatar(e.target.files?.[0] || null)}/></label>
+    <button className="btn w-full" disabled={busy}>{busy ? 'Creating account…' : 'Sign up'}</button>
+    <p className="text-sm text-gray-400">Already registered? <Link to="/login" state={{ from: location.state?.from }} className="text-indigo-300">Login</Link></p>
+    </form></div>;
 }

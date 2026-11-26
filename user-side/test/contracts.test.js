@@ -1,0 +1,10 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {array,unwrap,contentPath,searchItems,genreNames,safeReturnPath,validOrder,money} from '../src/utils/contracts.js';
+test('unwrap ApiResponse and reject SPA HTML',()=>{assert.deepEqual(unwrap({data:{data:{movies:[]}}}),{movies:[]});assert.throws(()=>unwrap({data:'<html>'}));});
+test('array guards missing values',()=>{assert.deepEqual(array(null),[]);assert.deepEqual(array({movies:[]}),[]);});
+test('content paths match all three content types',()=>{assert.equal(contentPath('Movie','1'),'/movies/1');assert.equal(contentPath('Series','2'),'/series/2');assert.equal(contentPath('Episode','3'),'/episodes/3');assert.equal(contentPath('Unknown','3'),null);});
+test('search preserves content type and ignores invalid items',()=>{assert.deepEqual(searchItems({movies:[{_id:'m'}],series:[{_id:'s'}],episodes:[{_id:'e'},{}]}).map(x=>x.path),['/movies/m','/series/s','/episodes/e']);});
+test('genre supports backend string array',()=>{assert.deepEqual(genreNames({genre:['Action','Drama']}),['Action','Drama']);assert.deepEqual(genreNames({genres:[{name:'Comedy'}]}),['Comedy']);});
+test('return path cannot redirect to other origins',()=>{for(const x of ['//example.com','https://example.com','/\\example.com','/login','/signup?foo=1'])assert.equal(safeReturnPath(x),'/');assert.equal(safeReturnPath('/movies/a'),'/movies/a');});
+test('Razorpay order uses integer paise and INR',()=>{assert.equal(validOrder({id:'order_1',amount:25000,currency:'INR'},'payment_1'),true);assert.equal(validOrder({id:'order_1',amount:0,currency:'INR'},'payment_1'),false);assert.equal(validOrder({id:'order_1',amount:25.2,currency:'INR'},'payment_1'),false);assert.equal(validOrder({id:'order_1',amount:200,currency:'USD'},'payment_1'),false);});
+test('price displays rupees not paise',()=>{assert.match(money(250),/250/);assert.equal(money(null),'Price unavailable');});
