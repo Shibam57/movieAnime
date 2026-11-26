@@ -1,0 +1,14 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { searchText, pagination, sortField, pick, bool, priceValue } = require('../src/utils/query');
+const { cookieOptions, origins, checkOrigin } = require('../src/utils/config');
+const limit = require('../src/middlewares/rateLimit');
+test('search treats regex metacharacters as text', () => { assert.equal(new RegExp(searchText('a.*[b]')).test('a.*[b]'), true); assert.equal(new RegExp(searchText('a.*[b]')).test('axxxb'), false); });
+test('search rejects invalid input', () => { assert.throws(() => searchText({$ne: ''}), { statusCode: 400 }); });
+test('pagination is bounded', () => { assert.deepEqual(pagination('2','1000'), [2,100]); assert.throws(() => pagination('abc',10), {statusCode:400}); });
+test('update and sort fields are allowlisted', () => { assert.deepEqual(pick({title:'ok',$set:{price:0}}, ['title']), {title:'ok'}); assert.equal(sortField('$bad'), 'createdAt'); });
+test('boolean values are not truthy strings', () => { assert.equal(bool('false'),false); assert.equal(bool(true),true); });
+test('INR price rejects invalid or under-minimum values', () => { assert.equal(priceValue('12.50',true),12.5); for (const n of [-1,0,0.5,NaN,1.005]) assert.throws(() => priceValue(n,true), {statusCode:400}); });
+test('production cookie configuration', () => { const old=process.env.NODE_ENV; process.env.NODE_ENV='production'; assert.deepEqual(cookieOptions(),{httpOnly:true,secure:true,sameSite:'none',path:'/'}); if(old===undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV=old; });
+test('origin checks reject unsafe browser writes', () => { const old=process.env.CORS_ORIGIN; process.env.CORS_ORIGIN='https://user.example, https://admin.example/'; assert.deepEqual(origins(),['https://user.example','https://admin.example']); let err; checkOrigin({method:'POST',get:()=> 'https://evil.example'}, {}, e=>err=e); assert.equal(err.statusCode,403); if(old===undefined) delete process.env.CORS_ORIGIN; else process.env.CORS_ORIGIN=old; });
+test('rate limiting rejects requests over the budget', () => { const middleware=limit(1); const req={ip:'test'}; let error; const res={set(){}}; middleware(req,res,e=>error=e); assert.equal(error,undefined); middleware(req,res,e=>error=e); assert.equal(error.statusCode,429); });
