@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {paths,validSession,needsRefresh,tokenExpiry,catalogData,money,dateLabel,paidPrice,validateFile,validId} from '../src/utils/contracts.js';
+const jwt=exp=>`x.${Buffer.from(JSON.stringify({exp})).toString('base64url')}.x`;
+test('admin endpoints use separate namespace',()=>{assert.equal(paths.refresh,'/api/v1/admins/refresh-token');assert.equal(paths.profile,'/api/v1/admins/admin-profile');});
+test('session requires both tokens',()=>{assert.equal(validSession({accessToken:'a'}),false);assert.equal(validSession({accessToken:'a',refreshToken:'b'}),true);});
+test('refreshes expired and near-expiry tokens',()=>{assert.equal(tokenExpiry(jwt(100)),100000);assert.equal(needsRefresh(jwt(100),80000),true);assert.equal(needsRefresh(jwt(100),50000),false);assert.equal(needsRefresh('bad',50000),true);});
+test('movies use server pagination',()=>{assert.deepEqual(catalogData({movies:[1],totalPages:3},'movie',10),{items:[1],totalPages:3,hasNext:null});assert.throws(()=>catalogData({movies:[]},'movie',10));});
+test('series use array and full page heuristic',()=>{assert.equal(catalogData([1,2],'series',2).hasNext,true);assert.equal(catalogData([1],'series',2).hasNext,false);assert.throws(()=>catalogData({},'series',2));});
+test('price contract',()=>{assert.equal(paidPrice(false,99),0);assert.equal(paidPrice(true,'12.50'),12.5);for(const price of ['0','0.99','abc','1.001',Infinity])assert.throws(()=>paidPrice(true,price));});
+test('upload file constraints',()=>{assert.doesNotThrow(()=>validateFile({size:10,type:'image/png'},'image',1));assert.throws(()=>validateFile({size:10,type:'text/plain'},'image',1));assert.throws(()=>validateFile({size:1048577,type:'video/mp4'},'video',1));assert.throws(()=>validateFile(null,'video',1));});
+test('valid IDs and formatting',()=>{assert.equal(validId('507f1f77bcf86cd799439011'),true);assert.equal(validId('bad'),false);assert.match(money(12.5),/12\.50/);assert.equal(dateLabel('invalid'),'—');});

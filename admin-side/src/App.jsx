@@ -1,4 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import RequireAdmin from "./components/RequireAdmin";
+import EditSeries from "./pages/series/EditSeries";
+import EditEpisode from "./pages/episode/EditEpisode";
 import Layout from "./components/Layout";
 import AddMovie from "./pages/AddMovie";
 import Dashboard from "./pages/Dashboard";
@@ -17,58 +20,43 @@ import SeasonList from "./pages/season/SeasonList";
 import EpisodeList from "./pages/episode/EpisodeList";
 import AddSeason from "./pages/season/AddSeason";
 import AddEpisode from "./pages/episode/AddEpisode";
-
-
-
-
-
 function App() {
-  return (
-    <>
+    return (<>
     <Router>
       <Routes>
         {/* Public pages: Login & Signup */}
-        <Route path="/admin/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/admin/login" element={<Login />}/>
+        <Route path="/signup" element={<Signup />}/>
 
         {/* Wrap all protected/admin pages inside Layout */}
+        <Route element={<RequireAdmin />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/movies/all" element={<Movies />} />
-          <Route path="movies/add" element={<AddMovie />} />
-          <Route path="series/add" element={<AddSeries />} />
-          <Route path="series/all" element={<SeriesList />} />
-          <Route path="/series/:seriesId/seasons" element={<SeasonList />} />
-          <Route path="/series/:seriesId/seasons/add" element={<AddSeason />} />
-          <Route
-          path="/series/:seriesId/seasons/:seasonId/episodes"
-          element={<EpisodeList />} />
-          <Route
-          path="/series/:seriesId/seasons/:seasonId/episodes/add"
-          element={<AddEpisode />} />
-          <Route path="/payments" element={<Payments/>} />
-          <Route path="/analytics" element={<Analytics/>} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/users" element={<Users />} />
+          <Route path="/" element={<Dashboard />}/>
+          <Route path="/movies/all" element={<Movies />}/>
+          <Route path="movies/add" element={<AddMovie />}/>
+          <Route path="series/add" element={<AddSeries />}/>
+          <Route path="series/all" element={<SeriesList />}/>
+          <Route path="/series/:seriesId/seasons" element={<SeasonList />}/>
+          <Route path="/series/:seriesId/seasons/add" element={<AddSeason />}/>
+          <Route path="/series/:seriesId/seasons/:seasonId/episodes" element={<EpisodeList />}/>
+          <Route path="/series/:seriesId/seasons/:seasonId/episodes/add" element={<AddEpisode />}/>
+          <Route path="/series/:seriesId/edit" element={<EditSeries />}/>
+          <Route path="/series/:seriesId/seasons/:seasonId/episodes/:episodeId/edit" element={<EditEpisode />}/>
+          <Route path="/admin/profile" element={<Settings />}/>
+          <Route path="/payments" element={<Payments />}/>
+          <Route path="/analytics" element={<Analytics />}/>
+          <Route path="/settings" element={<Settings />}/>
+          <Route path="/users" element={<Users />}/>
+        <Route path="*" element={<div className="panel">Page not found. <Link to="/">Return to dashboard</Link></div>}/>
+        </Route>
         </Route>
       </Routes>
     </Router>
     
     {/* Toast Container must be included once in your app */}
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}     // 2 seconds
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"       // or "dark"
-      />
-    </>
-  );
+      <ToastContainer position="top-right" autoClose={2000} // 2 seconds
+     hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" // or "dark"
+    />
+    </>);
 }
-
 export default App;

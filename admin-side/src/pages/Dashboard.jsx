@@ -1,61 +1,6 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardFooter } from "../components/ui/Card";
-import { BarChart3, Film, Users, Tv } from "lucide-react";
-
-export default function Dashboard() {
-  const [stats, setStats] = useState({ movies: 0, series: 0, users: 0, revenue: 0 });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/v1/dashboard/stats");
-        const result = await res.json();
-        setStats(result.data); // Access the 'data' property
-      } catch (err) {
-        console.error("Failed to load stats", err);
-      }
-    };
-    fetchStats();
-  }, []);
-
-  const cards = [
-    { title: "Movies", value: stats.movies, icon: <Film className="w-6 h-6 text-indigo-500" /> },
-    { title: "Series", value: stats.series, icon: <Tv className="w-6 h-6 text-green-500" /> },
-    { title: "Users", value: stats.totalUsers, icon: <Users className="w-6 h-6 text-pink-500" /> },
-    { title: "Revenue", value: `₹${stats.totalRevenue}`, icon: <BarChart3 className="w-6 h-6 text-yellow-500" /> },
-  ];
-
-  return (
-    <div className="space-y-8 p-6">
-      <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-3xl font-bold"
-      >
-        Dashboard Overview
-      </motion.h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {cards.map((card, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.2 }}
-          >
-            <Card className="hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="flex items-center gap-2 text-lg font-bold">
-                {card.icon}
-                {card.title}
-              </CardHeader>
-              <CardContent className="text-3xl font-semibold">{card.value}</CardContent>
-              <CardFooter>Total {card.title}</CardFooter>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { Link } from 'react-router-dom';
+import { Film, Tv, Users, BarChart3 } from 'lucide-react';
+import useResource from '../hooks/useResource';
+import State from '../components/ui/State';
+import { paths, money } from '../utils/contracts';
+export default function Dashboard() { const resource = useResource(paths.stats); const data = resource.data || {}; const stats = [['Movies', data.movies, Film, '/movies/all'], ['Series', data.series, Tv, '/series/all'], ['Users', data.totalUsers, Users, '/users'], ['Revenue', money(data.totalRevenue), BarChart3, '/payments']]; return <div className="space-y-5"><div className="flex justify-between items-center"><h1 className="page-title">Dashboard overview</h1><button className="btn-secondary" onClick={resource.reload}>Refresh</button></div><State resource={resource}><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{stats.map(([name, value, Icon, to]) => <Link className="panel hover:border-indigo-400" key={name} to={to}><div className="flex gap-2 items-center text-slate-600"><Icon size={20}/>{name}</div><p className="text-2xl font-bold mt-3">{value ?? '—'}</p></Link>)}</div><p className="text-xs text-slate-500 mt-4">Revenue is the backend's recorded successful payment total, not a settlement report.</p></State><div className="panel"><h2 className="font-bold mb-3">Quick actions</h2><div className="flex gap-2 flex-wrap"><Link className="btn" to="/movies/add">Add movie</Link><Link className="btn" to="/series/add">Add series</Link><Link className="btn-secondary" to="/analytics">View analytics</Link></div></div></div>; }
