@@ -19,10 +19,10 @@ router.post("/create-episode/:seasonId", verifyAdminJWT, upload.fields([{
 }]), createEpisode);
 
 router.get("/season/:seasonId", getEpisodesBySeason);
-router.get("/user-episode/:episodeId", verifyJWT, getEpisode);
+router.get("/user-episode/:episodeId", getEpisode);
 
 router.put("/:episodeId", verifyAdminJWT, updateEpisode);
 router.delete("/delete-episode/:episodeId", verifyAdminJWT, deleteEpisode);
-router.get("/play-episode/:episodeId", verifyJWT, playEpisode);
+router.get("/play-episode/:episodeId", playEpisode);
 
 module.exports = router

@@ -27,7 +27,7 @@ router.post("/", upload.fields([{
 router.get("/trending", getTrendingMovies);
 router.get("/series/:seriesId", getMoviesBySeries);
 router.get("/", getAllMovies);
-router.get("/:movieId", verifyJWT, getMovieById);
+router.get("/:movieId", getMovieById);
 router.delete("/:movieId", verifyAdminJWT, deleteVideo);
 router.patch("/:movieId/toggle-publish", verifyAdminJWT, togglePublishMovie);
 

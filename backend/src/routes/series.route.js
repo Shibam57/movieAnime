@@ -22,7 +22,7 @@ router.post("/", verifyAdminJWT, upload.fields([{
 }]), createSeries);
 
 router.get("/all-series", getAllSeries);
-router.get("/seriesId/:seriesId", verifyJWT, getSeriesById);
+router.get("/seriesId/:seriesId", getSeriesById);
 
 router.put(
     "/update-series/:seriesId",
